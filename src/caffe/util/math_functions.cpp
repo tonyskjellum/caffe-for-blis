@@ -7,6 +7,10 @@
 #include "caffe/util/math_functions.hpp"
 #include "caffe/util/rng.hpp"
 
+#ifdef USE_LAB_HERO
+// #include lab-hero-header..
+#endif
+
 namespace caffe {
 
 template<>
@@ -20,6 +24,25 @@ void caffe_cpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
       ldb, beta, C, N);
 }
 
+#ifdef USE_LAB_HERO
+
+template<>
+void caffe_cpu_gemm<double>(const CBLAS_TRANSPOSE TransA,
+    const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
+    const double alpha, const double* A, const double* B, const double beta,
+    double* C) {
+  int lda = (TransA == CblasNoTrans) ? K : M;
+  int ldb = (TransB == CblasNoTrans) ? N : K;
+
+  // create Lab-hero temp. matrices: A, B, C
+  // convert matrices to Morton order (maybe with temporaries): A, B
+  // call the LAB-HERO degemm (maybe with more shimming).
+  // convert the answeer in C back to the right row/col major format.
+  // delete Lab-hero matrices.
+  // return as if this were still calling cblas_dgemm.
+}
+
+#else
 template<>
 void caffe_cpu_gemm<double>(const CBLAS_TRANSPOSE TransA,
     const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
@@ -30,6 +53,7 @@ void caffe_cpu_gemm<double>(const CBLAS_TRANSPOSE TransA,
   cblas_dgemm(CblasRowMajor, TransA, TransB, M, N, K, alpha, A, lda, B,
       ldb, beta, C, N);
 }
+#endif
 
 template <>
 void caffe_cpu_gemv<float>(const CBLAS_TRANSPOSE TransA, const int M,
