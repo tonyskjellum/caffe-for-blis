@@ -7,12 +7,16 @@
 #include "caffe/util/math_functions.hpp"
 #include "caffe/util/rng.hpp"
 
+#define USE_LAB_HERO
+//#define CBLAS_GEMM_PRINT_INFO
+
 #ifdef USE_LAB_HERO
-// #include lab-hero-header..
+#include "/home/cwwoods/lab-hero/src/x86-64/strassend/labhero_cblas.h"
 #endif
 
 namespace caffe {
 
+#ifdef USE_LAB_HERO
 template<>
 void caffe_cpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
     const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
@@ -20,9 +24,31 @@ void caffe_cpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
     float* C) {
   int lda = (TransA == CblasNoTrans) ? K : M;
   int ldb = (TransB == CblasNoTrans) ? N : K;
+
+  #ifdef CBLAS_GEMM_PRINT_INFO
+  printf("caffe_cpu_gemm<single>: M = %5d, N = %5d, K=%5d; TransA=%s, TransB=%s; alpha = %g, beta = %g\n", M, N, K, (TransA==CblasNoTrans)?"No":"Yes", (TransB==CblasNoTrans)?"No":"Yes", alpha, beta);
+  #endif
+
+  labhero_cblas_sgemm(CblasRowMajor, TransA, TransB, M, N, K, alpha, A, lda, B,
+      ldb, beta, C, N);
+}
+#else 
+template<>
+void caffe_cpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
+    const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
+    const float alpha, const float* A, const float* B, const float beta,
+    float* C) {
+  int lda = (TransA == CblasNoTrans) ? K : M;
+  int ldb = (TransB == CblasNoTrans) ? N : K;
+
+  #ifdef CBLAS_GEMM_PRINT_INFO
+  printf("caffe_cpu_gemm<single>: M = %5d, N = %5d, K=%5d; TransA=%s, TransB=%s; alpha = %g, beta = %g\n", M, N, K, (TransA==CblasNoTrans)?"No":"Yes", (TransB==CblasNoTrans)?"No":"Yes", alpha, beta);
+  #endif
+
   cblas_sgemm(CblasRowMajor, TransA, TransB, M, N, K, alpha, A, lda, B,
       ldb, beta, C, N);
 }
+#endif
 
 #ifdef USE_LAB_HERO
 
@@ -40,6 +66,8 @@ void caffe_cpu_gemm<double>(const CBLAS_TRANSPOSE TransA,
   // convert the answeer in C back to the right row/col major format.
   // delete Lab-hero matrices.
   // return as if this were still calling cblas_dgemm.
+  cblas_dgemm(CblasRowMajor, TransA, TransB, M, N, K, alpha, A, lda, B,
+      ldb, beta, C, N);
 }
 
 #else
@@ -50,6 +78,11 @@ void caffe_cpu_gemm<double>(const CBLAS_TRANSPOSE TransA,
     double* C) {
   int lda = (TransA == CblasNoTrans) ? K : M;
   int ldb = (TransB == CblasNoTrans) ? N : K;
+
+  #ifdef CBLAS_GEMM_PRINT_INFO
+  printf("caffe_cpu_gemm<double>: M = %5d, N = %5d, K=%5d; TransA=%s, TransB=%s; alpha = %g, beta = %g\n", M, N, K, (TransA==CblasNoTrans)?"No":"Yes", (TransB==CblasNoTrans)?"No":"Yes", alpha, beta);
+  #endif
+
   cblas_dgemm(CblasRowMajor, TransA, TransB, M, N, K, alpha, A, lda, B,
       ldb, beta, C, N);
 }
