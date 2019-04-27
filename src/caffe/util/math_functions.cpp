@@ -8,7 +8,7 @@
 #include "caffe/util/rng.hpp"
 
 #define USE_LAB_HERO
-//#define CBLAS_GEMM_PRINT_INFO
+#define CBLAS_GEMM_PRINT_INFO
 
 #ifdef USE_LAB_HERO
 #include "/home/cwwoods/lab-hero/src/x86-64/strassend/labhero_cblas.h"
@@ -24,7 +24,6 @@ void caffe_cpu_gemm<float>(const CBLAS_TRANSPOSE TransA,
     float* C) {
   int lda = (TransA == CblasNoTrans) ? K : M;
   int ldb = (TransB == CblasNoTrans) ? N : K;
-
   #ifdef CBLAS_GEMM_PRINT_INFO
   printf("caffe_cpu_gemm<single>: M = %5d, N = %5d, K=%5d; TransA=%s, TransB=%s; alpha = %g, beta = %g\n", M, N, K, (TransA==CblasNoTrans)?"No":"Yes", (TransB==CblasNoTrans)?"No":"Yes", alpha, beta);
   #endif
