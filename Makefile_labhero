@@ -385,9 +385,7 @@ ifeq ($(BLAS), mkl)
 	BLAS_LIB ?= $(MKLROOT)/lib $(MKLROOT)/lib/intel64
 else ifeq ($(BLAS), open)
     # OpenBLAS
-	BLAS_INCLUDE = $(HOME)/openblas/include
-	BLAS_LIB = $(HOME)/openblas/lib
-	#BLAS_LIB += $(HOME)/lab-hero/src/x86-64/strassend
+	BLAS_LIB += $(HOME)/lab-hero/src/x86-64/strassend
 	LIBRARIES += labhero_cblas
 	LIBRARIES += openblas
 else ifeq ($(BLAS), blis)
